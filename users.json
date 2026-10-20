@@ -1,0 +1,18 @@
+{
+  "users": [
+    {
+      "id": "75aef712-acdb-4b7e-9dea-179640ecc6a5",
+      "username": "sultan",
+      "passwordHash": "$2b$12$D8CFALgTYoWNrd4lGN.QKejOoxmBeGdx4GTPPMukvnp.Hgj.kSBNK",
+      "role": "admin",
+      "createdAt": "2026-10-20T07:11:50.038Z"
+    },
+    {
+      "id": "e663440b-7c77-4e86-a21b-088b16e968e4",
+      "username": "ramij",
+      "passwordHash": "$2b$12$buaEN76NDKuumDs/67zLJeR.jEh2IFpU0eW8B7xkZOeen6/WJpma6",
+      "role": "user",
+      "createdAt": "2026-10-20T07:26:32.268Z"
+    }
+  ]
+}

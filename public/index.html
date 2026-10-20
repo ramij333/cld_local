@@ -1,0 +1,784 @@
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cloud Local</title>
+  <style>
+  :root{color-scheme:dark;--bg:#0c0f15;--panel:#161b25;--border:#2a3241;--text:#edf1fa;--muted:#929db1;--accent:#91a4ff;--green:#69ddb0;--red:#ff8585}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",sans-serif}
+  main{max-width:1000px;margin:auto;padding:32px 18px 60px}
+  header{display:flex;gap:13px;align-items:center;margin-bottom:28px}
+  .logo{display:grid;place-items:center;width:45px;height:45px;background:#252e4c;color:var(--accent);border-radius:13px;font-size:26px}
+  h1{font-size:23px;margin:0}h2{font-size:16px;margin:0 0 14px}
+  .sub,.hint,.meta,footer,.stats{color:var(--muted);font-size:12px}
+  .local{margin-left:auto;color:var(--green);font-size:12px;border:1px solid #285541;border-radius:99px;padding:5px 10px}
+  .panel,.item{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:15px}
+  .row{display:flex;gap:10px}
+  input,button{font:inherit;border-radius:9px;min-height:43px}
+  input[type=text]{flex:1;min-width:0;background:#0d121a;color:var(--text);border:1px solid #394355;padding:0 12px}
+  button{border:0;padding:0 15px;background:var(--accent);color:#11182d;font-weight:650;cursor:pointer}
+  button:disabled{opacity:.5}
+  .secondary{background:#293243;color:var(--text)}
+  .danger{background:#38232b;color:#ffaaaa}
+  .hint{margin-top:9px}
+  .torrent{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+  input[type=file]{min-width:0;flex:1;color:var(--muted)}
+  #message{margin-top:12px;font-size:13px;color:var(--green);overflow-wrap:anywhere}
+  #message.error{color:var(--red)}
+  .summary{display:flex;justify-content:space-between;margin:27px 0 12px}
+  .itemtop{display:flex;gap:12px;align-items:flex-start}
+  .fileicon{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;background:#273047;border-radius:10px}
+  .details{flex:1;min-width:0}.name{font-weight:650;overflow-wrap:anywhere}
+  .meta{margin-top:4px}.status{font-size:12px}
+  .bar{height:5px;background:#2a3241;border-radius:9px;margin:15px 0 9px;overflow:hidden}
+  .fill{height:100%;background:var(--accent)}
+  .bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .stats{flex:1}.actions{display:flex;gap:7px}.actions button{min-height:31px;padding:0 10px;font-size:12px}
+  .empty{text-align:center;color:var(--muted);padding:30px}
+  footer{margin-top:25px;line-height:2;overflow-wrap:anywhere}
+  @media(max-width:600px){main{padding:20px 12px}.panel,.item{padding:15px}.row{flex-wrap:wrap}.row input[type=text]{flex-basis:100%}.row button{flex:1}.actions{width:100%}}
+  .user-controls {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.local {
+  margin-left: 0;
+}
+
+.logout-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  background: #293243;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.logout-btn:hover {
+  background: #38232b;
+  color: #ffaaaa;
+}
+
+
+.register-btn {
+  min-height: 34px;
+  padding: 0 12px;
+  background: #293243;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.register-btn:hover {
+  background: #38232b;
+  color: #ffaaaa;
+}
+
+@media (max-width: 600px) {
+  .user-controls {
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+  </style>
+  </head>
+  <body>
+  <main>
+  <header>
+  <div class="logo">↓</div>
+  <div><h1>Cloud Local</h1><div class="sub">Your personal download manager</div></div>
+  <div class="user-controls">
+  <div class="local" id="userBadge">● Loading...</div>
+  <button id="changePasswordBtn" class="register-btn" type="button">
+    Change Password
+  </button>
+  <button id="registerBtn" class="register-btn" type="button" hidden>
+    Register User
+  </button>
+  <button id="logoutBtn" class="logout-btn" type="button">
+    Logout
+  </button>
+  
+  </div>
+  <!-- <div class="local" id="userBadge">● Loading...</div> -->
+  </header>
+
+  <section class="panel">
+  <h2>Add a download</h2>
+  <form id="urlForm">
+  <div class="row">
+  <input id="url" type="text" placeholder="Paste a direct URL or magnet link…" required>
+  <button id="addBtn">＋ Download</button>
+  </div>
+  </form>
+
+  <div class="hint">
+    Supports direct download links, magnet links, and supported
+    YouTube, Facebook, Instagram, TikTok and other video URLs.
+  </div>
+
+  <div class="torrent">
+  <h2>Add a torrent file</h2>
+  <form id="torrentForm">
+  <div class="row">
+  <input id="torrent" type="file" accept=".torrent" required>
+  <button id="torrentBtn">Add torrent</button>
+  </div>
+  </form>
+  </div>
+  <div id="message" role="status"></div>
+  </section>
+
+  <div class="summary"><h2>Your downloads</h2><span id="count" class="sub">Loading…</span></div>
+  <div id="downloads"><div class="panel empty">Connecting to aria2…</div></div>
+  <footer>Save folder: <strong id="folder">Loading...</strong><br>Keep the server running while downloading.</footer>
+  </main>
+
+  <script>
+
+
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"'"}[c]));
+
+  // Keep track of network status globally
+  let isNetworkOnline = navigator.onLine;
+
+  function bytes(n) {
+    if (!n) return "0 B";
+    let u = ["B", "KB", "MB", "GB", "TB"], i = 0;
+    while (n >= 1000 && i < 4) { n /= 1000; i++; }
+    return n.toFixed(i ? 1 : 0) + " " + u[i];
+  }
+
+  function say(s, error = false) {
+    $("message").textContent = s;
+    $("message").className = error ? "error" : "";
+  }
+
+  // Handle global network drop notices dynamically
+  function checkNetworkStatus() {
+    if (!navigator.onLine) {
+      isNetworkOnline = false;
+      say("Internet connection not available. Waiting to reconnect...", true);
+    } else {
+      if (isNetworkOnline === false) {
+        // Clear the message only if it was previously offline
+        say("");
+      }
+      isNetworkOnline = true;
+    }
+  }
+
+  // Listen to windows events for instantaneous feedback
+  window.addEventListener("online", () => { checkNetworkStatus(); refresh(); });
+  window.addEventListener("offline", () => { checkNetworkStatus(); refresh(); });
+
+  async function api(url, options = {}) {
+    let r = await fetch(url, options);
+    let d = await r.json();
+    if (!r.ok) throw Error(d.error || "Request failed");
+    return d;
+  }
+
+  // $("urlForm").onsubmit = async e => {
+  //   e.preventDefault();
+  //   $("addBtn").disabled = true;
+  //   say("Adding download…");
+  //   try {
+  //     await api("/api/add", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ url: $("url").value.trim() })
+  //     });
+  //     $("url").value = "";
+  //     say("Download added.");
+  //     await refresh();
+  //   } catch (err) {
+  //     say(err.message, true);
+  //   } finally {
+  //     $("addBtn").disabled = false;
+  //   }
+  // };
+
+
+
+    
+const SOCIAL_HOSTS = [
+  "youtube.com",
+  "youtu.be",
+  "youtube-nocookie.com",
+  "facebook.com",
+  "fb.watch",
+  "instagram.com",
+  "tiktok.com",
+  "vimeo.com",
+  "twitter.com",
+  "x.com",
+  "reddit.com"
+];
+
+function isSocialMediaUrl(value) {
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+
+    return (
+      ["http:", "https:"].includes(url.protocol) &&
+      SOCIAL_HOSTS.some(
+        domain => host === domain || host.endsWith("." + domain)
+      )
+    );
+  } catch {
+    return false;
+  }
+}
+
+const sleep = ms =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+  async function monitorSocialDownload(jobId) {
+  while (true) {
+    await sleep(1500);
+
+    let job;
+
+    try {
+      job = await api(
+        "/api/social-download/" + encodeURIComponent(jobId)
+      );
+    } catch (err) {
+      say("Unable to check download status: " + err.message, true);
+      return;
+    }
+
+    if (job.status === "downloading") {
+      say(
+        "Downloading video: " +
+        (job.progress || "Preparing video…")
+      );
+      continue;
+    }
+
+    if (job.status === "converting") {
+      say("Download complete. Converting video to MP4...");
+      continue;
+    }
+
+    if (job.status === "complete") {
+      say("Video downloaded and converted to MP4 successfully.");
+      await refresh();
+      return;
+    }
+
+    if (job.status === "error") {
+      say(
+        "Video processing failed: " +
+        (job.error || "The server did not provide an error message."),
+        true
+      );
+      await refresh();
+      return;
+    }
+
+    say("Download status: " + (job.status || "Unknown"), true);
+    return;
+  }
+}
+
+// async function monitorSocialDownload(jobId) {
+//   while (true) {
+//     await sleep(1500);
+
+//     const job = await api(
+//       "/api/social-download/" + encodeURIComponent(jobId)
+//     );
+
+//     if (job.status === "downloading") {
+//       say("Social-media download: " + (job.progress || "Preparing video…"));
+//       continue;
+//     }
+
+//     if (job.status === "complete") {
+//       say("Social-media download completed.");
+//       await refresh();
+//       return;
+//     }
+
+//     say(
+//       "Social-media download failed: " +
+//       (job.error || "Unknown error"),
+//       true
+//     );
+
+//     await refresh();
+//     return;
+//   }
+// }
+
+// Use exactly ONE submit handler for the URL form.
+$("urlForm").onsubmit = async function (e) {
+  e.preventDefault();
+
+  const button = $("addBtn");
+  const input = $("url");
+  const url = input.value.trim();
+
+  if (!url) {
+    say("Please enter a download link.", true);
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    if (isSocialMediaUrl(url)) {
+      // YouTube, Instagram, TikTok, Facebook, etc.
+      say("Starting social-media download…");
+
+      const result = await api("/api/social-download", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+      });
+
+      input.value = "";
+      say("Video download started.");
+
+      monitorSocialDownload(result.id).catch(err => {
+        say("Unable to monitor download: " + err.message, true);
+      });
+    } else {
+      // Direct HTTP/HTTPS links and magnet links.
+      say("Adding download…");
+
+      await api("/api/add", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url })
+      });
+
+      input.value = "";
+      say("Download added.");
+
+      await refresh();
+    }
+  } catch (err) {
+    say(err.message || "Unable to add download.", true);
+  } finally {
+    button.disabled = false;
+  }
+};
+
+
+
+
+
+
+
+  $("torrentForm").onsubmit = async e => {
+    e.preventDefault();
+    let f = $("torrent").files[0];
+    if (!f) return;
+    $("torrentBtn").disabled = true;
+    say("Adding torrent…");
+    try {
+      await api("/api/torrent", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-bittorrent" },
+        body: f
+      });
+      $("torrent").value = "";
+      say("Torrent added.");
+      await refresh();
+    } catch (err) {
+      say(err.message, true);
+    } finally {
+      $("torrentBtn").disabled = false;
+    }
+  };
+
+// async function act(gid, action) {
+//   try {
+//     await api("/api/action", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ gid, action })
+//     });
+//     say("Action completed.");
+//     await refresh();
+//   } catch (err) {
+//     say(err.message, true);
+//   }
+// }
+
+
+async function act(gid, action, name = "") {
+  try {
+    await api("/api/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gid, action, name }) // <-- Passing the file name down to the server
+    });
+    say("Action completed.");
+    await refresh();
+  } catch (err) {
+    say(err.message, true);
+  }
+  
+}
+
+
+
+
+function card(x) {
+  const done = x.status === "complete";
+  const fail = x.status === "error";
+  const active = x.status === "active";
+  const paused = x.status === "paused";
+  const waiting = x.status === "waiting";
+  const converting = x.status === "converting";
+  const social = x.social === true;
+
+  const isStuckOffline =
+    !isNetworkOnline && (active || waiting);
+
+  // Handle both numeric progress values and strings such as "45.2%".
+  const rawProgress = typeof x.progress === "string"
+    ? parseFloat(x.progress)
+    : Number(x.progress || 0);
+
+  const pct = Math.min(100, Math.max(0, rawProgress || 0));
+
+  const label = done
+    ? "Completed"
+    : fail
+      ? "Error: " + (x.error || "Unknown error")
+      : converting
+        ? "Converting to MP4..."
+        : isStuckOffline
+          ? "Waiting for network..."
+          : active
+            ? (social ? "Downloading video" : "Downloading")
+            : paused
+              ? "Paused"
+              : waiting
+                ? "Queued"
+                : x.status;
+
+  // Social job sizes come from yt-dlp's progress output.
+  const downloaded = Number(
+    social ? x.done : x.done
+  ) || 0;
+
+  const total = Number(x.total) || 0;
+  const speed = Number(x.speed) || 0;
+
+  // Show a download link only for completed files.
+  // Social jobs use their final MP4 filename.
+  const nameDisplay = done
+    ? '<a href="/files/' +
+        encodeURIComponent(x.name) +
+        '" target="_blank" download="' +
+        esc(x.name) +
+        '" style="color:var(--accent);text-decoration:none;font-weight:650;">' +
+        esc(x.name) +
+        ' 📥</a>'
+    : esc(x.name);
+
+  let mainActionButton = "";
+
+  // Social jobs do not use aria2 pause/resume actions.
+  if (!social) {
+    if (active || waiting) {
+      mainActionButton = isStuckOffline
+        ? '<button class="secondary" disabled>Paused</button>'
+        : '<button class="secondary" data-act="pause" data-gid="' +
+            esc(x.gid) +
+            '">Pause</button>';
+    } else if (paused) {
+      mainActionButton =
+        '<button class="secondary" data-act="resume" data-gid="' +
+        esc(x.gid) +
+        '">Resume</button>';
+    }
+  }
+
+  let statsText;
+
+  if (converting) {
+    statsText = "Download finished · Encoding MP4";
+  } else if (done) {
+    statsText = "100% · Finished";
+  } else if (fail) {
+    statsText = "Download failed";
+  } else {
+    statsText = pct.toFixed(1) + "%";
+
+    if (total > 0) {
+      statsText += " · " + bytes(downloaded) + " / " + bytes(total);
+    } else if (downloaded > 0) {
+      statsText += " · " + bytes(downloaded) + " downloaded";
+    }
+
+    if (active && isNetworkOnline && speed > 0) {
+      statsText += " · " + bytes(speed) + "/s";
+    }
+
+    if (social && active && x.eta) {
+      statsText += " · ETA: " + x.eta;
+    }
+
+    if (x.seeders && isNetworkOnline && !social) {
+      statsText += " · Seeds: " + x.seeders;
+    }
+  }
+
+  const statusColor = fail || isStuckOffline
+    ? "var(--red)"
+    : done
+      ? "var(--green)"
+      : "var(--muted)";
+
+  const icon = done
+    ? "✓"
+    : (fail || isStuckOffline)
+      ? "!"
+      : converting
+        ? "⚙"
+        : "↓";
+
+  return '<article class="item">' +
+    '<div class="itemtop">' +
+      '<div class="fileicon">' + icon + '</div>' +
+      '<div class="details">' +
+        '<div class="name">' + nameDisplay + '</div>' +
+        '<div class="meta">' +
+          (social ? 'Social media · ' : '') +
+          (total > 0
+            ? bytes(downloaded) + ' / ' + bytes(total)
+            : bytes(downloaded) + ' downloaded') +
+        '</div>' +
+      '</div>' +
+      '<div class="status" style="color:' + statusColor + '">' +
+        esc(label) +
+      '</div>' +
+    '</div>' +
+
+    '<div class="bar">' +
+      '<div class="fill" style="width:' +
+        (converting ? 100 : pct) +
+      '%"></div>' +
+    '</div>' +
+
+    '<div class="bottom">' +
+      '<div class="stats">' + esc(statsText) + '</div>' +
+      '<div class="actions">' +
+        mainActionButton +
+        '<button class="danger" data-act="remove" data-gid="' +
+  esc(x.gid) +
+  '" data-social="' + (social ? 'true' : 'false') +
+  '">Remove</button>' +
+      '</div>' +
+    '</div>' +
+  '</article>';
+}
+
+
+// function card(x) {
+//   let done = x.status === "complete", fail = x.status === "error", active = x.status === "active", paused = x.status === "paused", waiting = x.status === "waiting";
+  
+//   let isStuckOffline = !isNetworkOnline && (active || waiting);
+//   let label = done ? "Completed"
+//   : fail ? "Error: " + x.error
+//   : converting ? "Converting to MP4..."
+//   : isStuckOffline ? "Waiting for network..."
+//   : active ? (social ? "Downloading video" : "Downloading")
+//   : paused ? "Paused"
+//   : waiting ? "Queued"
+//   : x.status;
+//   //let label = done ? "Completed" : fail ? "Error: " + x.error : isStuckOffline ? "Waiting for network..." : active ? "Downloading" : paused ? "Paused" : waiting ? "Queued" : x.status;
+//   let pct = Math.min(100, Math.max(0, x.progress || 0));
+  
+//   // Safe streaming link using concatenation
+//   let nameDisplay = done 
+//     ? '<a href="/files/' + encodeURIComponent(x.name) + '" target="_blank" download="' + esc(x.name) + '" style="color:var(--accent); text-decoration:none; font-weight:650;">' + esc(x.name) + ' 📥</a>'
+//     : esc(x.name);
+
+//   let mainActionButton = "";
+//   if (active || waiting) {
+//     if (isStuckOffline) {
+//       mainActionButton = '<button class="secondary" disabled>Paused</button>';
+//     } else {
+//       mainActionButton = '<button class="secondary" data-act="pause" data-gid="' + esc(x.gid) + '">Pause</button>';
+//     }
+//   } else if (paused) {
+//     mainActionButton = '<button class="secondary" data-act="resume" data-gid="' + esc(x.gid) + '">Resume</button>';
+//   }
+
+//   return '<article class="item">' +
+//     '<div class="itemtop">' +
+//       '<div class="fileicon">' + (done ? "✓" : (fail || isStuckOffline) ? "!" : "↓") + '</div>' +
+//       '<div class="details">' +
+//         '<div class="name">' + nameDisplay + '</div>' +
+//         '<div class="meta">' + bytes(x.done) + ' / ' + bytes(x.total) + '</div>' +
+//       '</div>' +
+//       '<div class="status" style="color:' + ((fail || isStuckOffline) ? "var(--red)" : done ? "var(--green)" : "var(--muted)") + '">' + esc(label) + '</div>' +
+//     '</div>' +
+//     '<div class="bar">' +
+//       '<div class="fill" style="width:' + pct + '%"></div>' +
+//     '</div>' +
+//     '<div class="bottom">' +
+//       '<div class="stats">' + pct.toFixed(1) + '% · ' + (active && isNetworkOnline ? esc(bytes(x.speed) + "/s") : done ? "Finished" : "—") + (x.seeders && isNetworkOnline ? " · Seeds: " + x.seeders : "") + '</div>' +
+//       '<div class="actions">' +
+//         mainActionButton +
+//         '<button class="danger" data-act="remove" data-gid="' + esc(x.gid) + '">Remove</button>' +
+//       '</div>' +
+//     '</div>' +
+//   '</article>';
+// }
+
+
+
+$("downloads").onclick = e => {
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+
+  const gid = b.dataset.gid;
+  const action = b.dataset.act;
+  const isSocial = b.dataset.social === "true";
+
+  const cardItem = b.closest(".item");
+  const nameEl = cardItem?.querySelector(".name");
+
+  const filename = nameEl
+    ? nameEl.textContent.replace(/\s*📥\s*$/, "").trim()
+    : "";
+
+  if (isSocial) {
+    if (action === "remove") {
+      GenUIPlaceholder;
+    }
+    return;
+  }
+
+  act(gid, action, filename);
+};
+
+
+
+// $("downloads").onclick = e => {
+//   let b = e.target.closest("button[data-act]");
+//   if (b) {
+//     // Traverse up to find the contextual item card name string
+//     let cardItem = b.closest(".item");
+//     let filename = cardItem ? cardItem.querySelector(".name").textContent : "";
+//     act(b.dataset.gid, b.dataset.act, filename);
+//   }
+// };
+
+async function refresh() {
+  // Always verify network availability before making a request
+  checkNetworkStatus();
+  
+  try {
+    let d = await api("/api/downloads");
+    let a = d.downloads || [];
+    $("folder").textContent = d.folder;
+    $("count").textContent = a.length + " items";
+    $("downloads").innerHTML = a.length 
+      ? a.slice().reverse().map(card).join("") 
+      : '<div class="panel empty">No downloads yet. Paste a link above to get started.</div>';
+  } catch (err) {
+    $("count").textContent = "Engine unavailable";
+    $("downloads").innerHTML = '<div class="panel empty">' + esc(err.message) + '</div>';
+  }
+}
+
+async function loadUserInfo() {
+  try {
+    const user = await api("/api/me");
+
+    $("userBadge").textContent =
+      "● " + user.username + " (" + user.role + ")";
+
+    // Only admins can see the Register User button
+    $("registerBtn").hidden = user.role !== "admin";
+
+  } catch (err) {
+    $("registerBtn").hidden = true;
+
+    if (err.message === "Please log in first.") {
+      window.location.replace("/login");
+      return;
+    }
+
+    $("userBadge").textContent = "● Account unavailable";
+  }
+}
+
+
+$("registerBtn").addEventListener("click", () => {
+  window.location.href = "/register";
+});
+
+$("logoutBtn").addEventListener("click", async () => {
+  const button = $("logoutBtn");
+  button.disabled = true;
+
+  try {
+    await api("/api/logout", {
+      method: "POST"
+    });
+
+    // Session destroyed successfully; return to login
+    window.location.replace("/login");
+
+  } catch (err) {
+    say(err.message, true);
+    button.disabled = false;
+  }
+});
+
+
+// async function loadUserInfo() {
+//   try {
+//     const user = await api("/api/me");
+
+//     $("userBadge").textContent =
+//       "● " + user.username + " (" + user.role + ")";
+//   } catch (err) {
+//     if (err.message === "Please log in first.") {
+//       window.location.href = "/login";
+//       return;
+//     }
+
+//     $("userBadge").textContent = "● Account unavailable";
+//   }
+// }
+
+
+$("changePasswordBtn").addEventListener("click", () => {
+  window.location.href = "/change-password";
+});
+
+// Initialize layout tracking
+checkNetworkStatus();
+loadUserInfo();
+refresh();
+setInterval(refresh, 2000);
+</script>
+
+</body>
+</html>

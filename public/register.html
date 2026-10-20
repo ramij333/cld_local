@@ -1,0 +1,474 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Create Account | Cloud Local</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0f15;
+      --panel: #161b25;
+      --border: #2a3241;
+      --text: #edf1fa;
+      --muted: #929db1;
+      --accent: #91a4ff;
+      --green: #69ddb0;
+      --red: #ff8585;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 14px;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 "Segoe UI", sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 410px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 13px;
+      background: #252e4c;
+      color: var(--accent);
+      font-size: 27px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel {
+      padding: 25px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+    }
+
+    h2 {
+      margin: 0 0 5px;
+      font-size: 19px;
+    }
+
+    .description {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid #394355;
+      border-radius: 9px;
+      outline: none;
+      background: #0d121a;
+      color: var(--text);
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px #91a4ff22;
+    }
+
+    input::placeholder {
+      color: #6f7b90;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-right: 76px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      width: auto;
+      min-height: 30px;
+      padding: 0 7px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .hint {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .requirements {
+      margin: -4px 0 16px;
+      padding: 11px 13px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .requirements p {
+      margin: 0 0 5px;
+    }
+
+    .requirements ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .requirements li {
+      margin: 3px 0;
+    }
+
+    .requirements li.valid {
+      color: var(--green);
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 45px;
+      margin-top: 3px;
+      padding: 0 15px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #11182d;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .submit:hover {
+      filter: brightness(1.06);
+    }
+
+    .submit:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    #message {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    #message.error {
+      display: block;
+      border-color: #63333b;
+      background: #38232b;
+      color: var(--red);
+    }
+
+    #message.success {
+      display: block;
+      border-color: #285541;
+      background: #182b25;
+      color: var(--green);
+    }
+
+    .signin {
+      margin: 20px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 420px) {
+      .panel {
+        padding: 20px 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header class="brand">
+      <div class="logo">↓</div>
+      <div>
+        <h1>Cloud Local</h1>
+        <div class="subtitle">Your personal download manager</div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Create an User</h2>
+      <p class="description">
+        Register to give access on your local download manager.
+      </p>
+
+      <form id="registerForm">
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Choose a username"
+            minlength="3"
+            maxlength="24"
+            pattern="[A-Za-z0-9_]{3,24}"
+            autocomplete="username"
+            required
+          >
+          <div class="hint">
+            3–24 characters. Letters, numbers and underscores only.
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Create a strong password"
+              autocomplete="new-password"
+              required
+            >
+            <button
+              class="toggle-password"
+              type="button"
+              data-target="password"
+              aria-label="Show password"
+            >Show</button>
+          </div>
+        </div>
+
+        <div class="requirements">
+          <p>Password requirements</p>
+          <ul>
+            <li id="lengthRule">At least 8 characters</li>
+            <li id="byteRule">No more than 72 UTF-8 bytes</li>
+          </ul>
+        </div>
+
+        <div class="field">
+          <label for="confirmPassword">Confirm password</label>
+          <div class="password-wrap">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type="password"
+              placeholder="Enter your password again"
+              autocomplete="new-password"
+              required
+            >
+            <button
+              class="toggle-password"
+              type="button"
+              data-target="confirmPassword"
+              aria-label="Show confirmation password"
+            >Show</button>
+          </div>
+        </div>
+
+        <button class="submit" id="registerBtn" type="submit">
+          Create account
+        </button>
+
+        <div id="message" role="status" aria-live="polite"></div>
+      </form>
+
+      <!-- <p class="signin">
+        Already have an account?
+        <a href="/login">Sign in</a>
+      </p> -->
+    </section>
+
+    <footer>
+      Local account registration · Cloud Local
+    </footer>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const form = $("registerForm");
+    const username = $("username");
+    const password = $("password");
+    const confirmPassword = $("confirmPassword");
+    const registerBtn = $("registerBtn");
+    const message = $("message");
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    function updateRequirements() {
+      const value = password.value;
+      const bytes = new TextEncoder().encode(value).length;
+
+      $("lengthRule").classList.toggle("valid", value.length >= 8);
+      $("byteRule").classList.toggle("valid", bytes <= 72);
+    }
+
+    password.addEventListener("input", updateRequirements);
+
+    document.querySelectorAll(".toggle-password").forEach(button => {
+      button.addEventListener("click", () => {
+        const field = $(button.dataset.target);
+        const show = field.type === "password";
+
+        field.type = show ? "text" : "password";
+        button.textContent = show ? "Hide" : "Show";
+        button.setAttribute(
+          "aria-label",
+          show ? "Hide password" : "Show password"
+        );
+      });
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      message.className = "";
+      message.textContent = "";
+
+      const name = username.value.trim();
+      const pass = password.value;
+      const confirmation = confirmPassword.value;
+      const passwordBytes = new TextEncoder().encode(pass).length;
+
+      if (!/^[a-zA-Z0-9_]{3,24}$/.test(name)) {
+        showMessage(
+          "Username must be 3–24 characters using letters, numbers or underscores.",
+          "error"
+        );
+        return;
+      }
+
+      if (pass.length < 8 || passwordBytes > 72) {
+        showMessage(
+          "Use a password of at least 8 characters and no more than 72 UTF-8 bytes.",
+          "error"
+        );
+        return;
+      }
+
+      if (pass !== confirmation) {
+        showMessage("The passwords do not match.", "error");
+        confirmPassword.focus();
+        return;
+      }
+
+      registerBtn.disabled = true;
+      registerBtn.textContent = "Creating account...";
+
+      try {
+        const response = await fetch("/api/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            username: name,
+            password: pass
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Registration failed.");
+        }
+
+        showMessage(
+          "Account created successfully! Redirecting to login...",
+          "success"
+        );
+
+        form.reset();
+        updateRequirements();
+
+        window.setTimeout(() => {
+          window.location.replace("/login");
+        }, 1000);
+
+      } catch (error) {
+        showMessage(
+          error.message || "Could not connect to the server.",
+          "error"
+        );
+      } finally {
+        registerBtn.disabled = false;
+        registerBtn.textContent = "Create account";
+      }
+    });
+  </script>
+</body>
+</html>

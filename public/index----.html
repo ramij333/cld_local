@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Local</title>
+<style>
+:root{color-scheme:dark;--bg:#0c0f15;--panel:#161b25;--border:#2a3241;--text:#edf1fa;--muted:#929db1;--accent:#91a4ff;--green:#69ddb0;--red:#ff8585}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 "Segoe UI",sans-serif}
+main{max-width:1000px;margin:auto;padding:32px 18px 60px}
+header{display:flex;gap:13px;align-items:center;margin-bottom:28px}
+.logo{display:grid;place-items:center;width:45px;height:45px;background:#252e4c;color:var(--accent);border-radius:13px;font-size:26px}
+h1{font-size:23px;margin:0}h2{font-size:16px;margin:0 0 14px}
+.sub,.hint,.meta,footer,.stats{color:var(--muted);font-size:12px}
+.local{margin-left:auto;color:var(--green);font-size:12px;border:1px solid #285541;border-radius:99px;padding:5px 10px}
+.panel,.item{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:15px}
+.row{display:flex;gap:10px}
+input,button{font:inherit;border-radius:9px;min-height:43px}
+input[type=text]{flex:1;min-width:0;background:#0d121a;color:var(--text);border:1px solid #394355;padding:0 12px}
+button{border:0;padding:0 15px;background:var(--accent);color:#11182d;font-weight:650;cursor:pointer}
+button:disabled{opacity:.5}
+.secondary{background:#293243;color:var(--text)}
+.danger{background:#38232b;color:#ffaaaa}
+.hint{margin-top:9px}
+.torrent{margin-top:20px;padding-top:18px;border-top:1px solid var(--border)}
+input[type=file]{min-width:0;flex:1;color:var(--muted)}
+#message{margin-top:12px;font-size:13px;color:var(--green);overflow-wrap:anywhere}
+#message.error{color:var(--red)}
+.summary{display:flex;justify-content:space-between;margin:27px 0 12px}
+.itemtop{display:flex;gap:12px;align-items:flex-start}
+.fileicon{display:grid;place-items:center;flex-shrink:0;width:38px;height:38px;background:#273047;border-radius:10px}
+.details{flex:1;min-width:0}.name{font-weight:650;overflow-wrap:anywhere}
+.meta{margin-top:4px}.status{font-size:12px}
+.bar{height:5px;background:#2a3241;border-radius:9px;margin:15px 0 9px;overflow:hidden}
+.fill{height:100%;background:var(--accent)}
+.bottom{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stats{flex:1}.actions{display:flex;gap:7px}.actions button{min-height:31px;padding:0 10px;font-size:12px}
+.empty{text-align:center;color:var(--muted);padding:30px}
+footer{margin-top:25px;line-height:2;overflow-wrap:anywhere}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.logout-btn{min-height:32px;background:#293243;color:var(--text);font-size:12px;padding:0 14px}
+@media(max-width:600px){main{padding:20px 12px}.panel,.item{padding:15px}.row{flex-wrap:wrap}.row input[type=text]{flex-basis:100%}.row button{flex:1}.actions{width:100%}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="logo">↓</div>
+<div><h1>Cloud Local</h1><div class="sub">Your personal download manager</div></div>
+<div class="header-right">
+  <div class="local">● Local</div>
+  <button class="logout-btn" onclick="location.href='/logout'">Logout</button>
+</div>
+</header>
+
+<section class="panel" id="addPanel">
+<h2>Add a download</h2>
+<form id="urlForm">
+<div class="row">
+<input id="url" type="text" placeholder="Paste a direct URL or magnet link…" required>
+<button id="addBtn">＋ Download</button>
+</div>
+</form>
+<div class="hint">Supports direct HTTP/HTTPS file links and magnet links.</div>
+
+<div class="torrent">
+<h2>Add a torrent file</h2>
+<form id="torrentForm">
+<div class="row">
+<input id="torrent" type="file" accept=".torrent" required>
+<button id="torrentBtn">Add torrent</button>
+</div>
+</form>
+</div>
+<div id="message" role="status"></div>
+</section>
+
+<div class="summary"><h2>Your downloads</h2><span id="count" class="sub">Loading…</span></div>
+<div id="downloads"><div class="panel empty">Connecting to aria2…</div></div>
+<footer>Save folder: <strong id="folder">Loading...</strong><br>Keep the server running while downloading.</footer>
+</main>
+
+
+
+
+
+
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"'"}[c]));
+
+let isNetworkOnline = navigator.onLine;
+let userRole = "user"; 
+
+function bytes(n) {
+  if (!n) return "0 B";
+  let u = ["B", "KB", "MB", "GB", "TB"], i = 0;
+  while (n >= 1000 && i < 4) { n /= 1000; i++; }
+  return n.toFixed(i ? 1 : 0) + " " + u[i];
+}
+
+function say(s, error = false) {
+  if ($("message")) {
+    $("message").textContent = s;
+    $("message").className = error ? "error" : "";
+  }
+}
+
+function checkNetworkStatus() {
+  if (!navigator.onLine) {
+    isNetworkOnline = false;
+    say("Internet connection not available. Waiting to reconnect...", true);
+  } else {
+    if (isNetworkOnline === false) say("");
+    isNetworkOnline = true;
+  }
+}
+
+window.addEventListener("online", () => { checkNetworkStatus(); refresh(); });
+window.addEventListener("offline", () => { checkNetworkStatus(); refresh(); });
+
+async function api(url, options = {}) {
+  let r = await fetch(url, options);
+  if (r.status === 401) {
+    window.location.href = "/login.html";
+    return null;
+  }
+  let d = await r.json();
+  if (!r.ok) throw Error(d.error || "Request failed");
+  return d;
+}
+
+if ($("urlForm")) {
+  $("urlForm").onsubmit = async e => {
+    e.preventDefault();
+    $("addBtn").disabled = true;
+    say("Adding download…");
+    try {
+      await api("/api/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: $("url").value.trim() })
+      });
+      $("url").value = "";
+      say("Download added.");
+      await refresh();
+    } catch (err) {
+      say(err.message, true);
+    } finally {
+      $("addBtn").disabled = false;
+    }
+  };
+}
+
+if ($("torrentForm")) {
+  $("torrentForm").onsubmit = async e => {
+    e.preventDefault();
+    let f = $("torrent").files[0];
+    if (!f) return;
+    $("torrentBtn").disabled = true;
+    say("Adding torrent…");
+    try {
+      await api("/api/torrent", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-bittorrent" },
+        body: f
+      });
+      $("torrent").value = "";
+      say("Torrent added.");
+      await refresh();
+    } catch (err) {
+      say(err.message, true);
+    } finally {
+      $("torrentBtn").disabled = false;
+    }
+  };
+}
+
+async function act(gid, action, name = "") {
+  try {
+    await api("/api/action", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gid, action, name })
+    });
+    await refresh();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
+function card(x) {
+  let done = x.status === "complete", fail = x.status === "error", active = x.status === "active", paused = x.status === "paused", waiting = x.status === "waiting";
+  let isStuckOffline = !isNetworkOnline && (active || waiting);
+  let label = done ? "Completed" : fail ? "Error: " + x.error : isStuckOffline ? "Waiting for network..." : active ? "Downloading" : paused ? "Paused" : waiting ? "Queued" : x.status;
+  let pct = Math.min(100, Math.max(0, x.progress || 0));
+  
+  let nameDisplay = done 
+    ? '<a href="/files/' + encodeURIComponent(x.name) + '" target="_blank" download="' + esc(x.name) + '" style="color:var(--accent); text-decoration:none; font-weight:650;">' + esc(x.name) + ' 📥</a>'
+    : esc(x.name);
+
+  let actionButtons = "";
+  if (userRole === "admin") {
+    let mainActionButton = "";
+    if (active || waiting) {
+      mainActionButton = isStuckOffline ? '<button class="secondary" disabled>Paused</button>' : '<button class="secondary" data-act="pause" data-gid="' + esc(x.gid) + '">Pause</button>';
+    } else if (paused) {
+      mainActionButton = '<button class="secondary" data-act="resume" data-gid="' + esc(x.gid) + '">Resume</button>';
+    }
+    actionButtons = '<div class="actions">' + mainActionButton + '<button class="danger" data-act="remove" data-gid="' + esc(x.gid) + '">Remove</button></div>';
+  }
+
+  return '<article class="item">' +
+    '<div class="itemtop">' +
+      '<div class="fileicon">' + (done ? "✓" : (fail || isStuckOffline) ? "!" : "↓") + '</div>' +
+      '<div class="details">' +
+        '<div class="name">' + nameDisplay + '</div>' +
+        '<div class="meta">' + bytes(x.done) + ' / ' + bytes(x.total) + '</div>' +
+      '</div>' +
+      '<div class="status" style="color:' + ((fail || isStuckOffline) ? "var(--red)" : done ? "var(--green)" : "var(--muted)") + '">' + esc(label) + '</div>' +
+    '</div>' +
+    '<div class="bar">' +
+      '<div class="fill" style="width:' + pct + '%"></div>' +
+    '</div>' +
+    '<div class="bottom">' +
+      '<div class="stats">' + pct.toFixed(1) + '% · ' + (active && isNetworkOnline ? esc(bytes(x.speed) + "/s") : done ? "Finished" : "—") + (x.seeders && isNetworkOnline ? " · Seeds: " + x.seeders : "") + '</div>' +
+      actionButtons +
+    '</div>' +
+  '</article>';
+}
+
+$("downloads").onclick = e => {
+  let b = e.target.closest("button[data-act]");
+  if (b) {
+    let cardItem = b.closest(".item");
+    let filename = "";
+    if (cardItem) {
+      filename = cardItem.querySelector(".name").textContent.replace(/\s*📥\s*$/, "").trim();
+    }
+    act(b.dataset.gid, b.dataset.act, filename);
+  }
+};
+
+async function refresh() {
+  checkNetworkStatus();
+  try {
+    let d = await api("/api/downloads");
+    if (!d) return;
+    
+    userRole = d.role;
+    if (userRole !== "admin" && $("addPanel")) {
+      $("addPanel").remove(); 
+    }
+
+    $("folder").textContent = d.folder;
+    $("count").textContent = d.downloads.length + " items";
+    $("downloads").innerHTML = d.downloads.length 
+      ? d.downloads.slice().reverse().map(card).join("") 
+      : '<div class="panel empty">No downloads yet.</div>';
+  } catch (err) {
+    $("count").textContent = "Engine unavailable";
+    $("downloads").innerHTML = '<div class="panel empty">' + esc(err.message) + '</div>';
+  }
+}
+
+checkNetworkStatus();
+refresh();
+setInterval(refresh, 2000);
+</script>
+</body>
+</html>

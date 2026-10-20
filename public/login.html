@@ -1,0 +1,384 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Login | Cloud Local</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0c0f15;
+      --panel: #161b25;
+      --border: #2a3241;
+      --text: #edf1fa;
+      --muted: #929db1;
+      --accent: #91a4ff;
+      --green: #69ddb0;
+      --red: #ff8585;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 14px;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 "Segoe UI", sans-serif;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 410px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      flex-shrink: 0;
+      border-radius: 13px;
+      background: #252e4c;
+      color: var(--accent);
+      font-size: 27px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 23px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .panel {
+      padding: 25px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+    }
+
+    h2 {
+      margin: 0 0 5px;
+      font-size: 19px;
+    }
+
+    .description {
+      margin: 0 0 22px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .field {
+      margin-bottom: 17px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 7px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid #394355;
+      border-radius: 9px;
+      outline: none;
+      background: #0d121a;
+      color: var(--text);
+      font: inherit;
+    }
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px #91a4ff22;
+    }
+
+    input::placeholder {
+      color: #6f7b90;
+    }
+
+    .password-wrap {
+      position: relative;
+    }
+
+    .password-wrap input {
+      padding-right: 75px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      min-height: 30px;
+      padding: 0 7px;
+      border: 0;
+      background: transparent;
+      color: var(--accent);
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .submit {
+      width: 100%;
+      min-height: 45px;
+      margin-top: 3px;
+      padding: 0 15px;
+      border: 0;
+      border-radius: 9px;
+      background: var(--accent);
+      color: #11182d;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .submit:hover {
+      filter: brightness(1.06);
+    }
+
+    .submit:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    #message {
+      display: none;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+    }
+
+    #message.error {
+      display: block;
+      border-color: #63333b;
+      background: #38232b;
+      color: var(--red);
+    }
+
+    #message.success {
+      display: block;
+      border-color: #285541;
+      background: #182b25;
+      color: var(--green);
+    }
+
+    .register {
+      margin: 20px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      margin-top: 18px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
+    @media (max-width: 420px) {
+      .panel {
+        padding: 20px 17px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header class="brand">
+      <div class="logo">↓</div>
+      <div>
+        <h1>Cloud Local</h1>
+        <div class="subtitle">Your personal download manager</div>
+      </div>
+    </header>
+
+    <section class="panel">
+      <h2>Welcome back</h2>
+      <p class="description">
+        Sign in to access your downloads.
+      </p>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            type="text"
+            placeholder="Enter your username"
+            minlength="3"
+            maxlength="24"
+            autocomplete="username"
+            required
+            autofocus
+          >
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            >
+            <button
+              class="toggle-password"
+              type="button"
+              id="togglePassword"
+              aria-label="Show password"
+            >Show</button>
+          </div>
+        </div>
+
+        <button class="submit" id="loginBtn" type="submit">
+          Sign in
+        </button>
+
+        <div id="message" role="status" aria-live="polite"></div>
+      </form>
+
+      <!-- <p class="register">
+        Don't have an account?
+        <a href="/register">Create account</a>
+      </p> -->
+    </section>
+
+    <footer>
+      Local account login · Cloud Local
+    </footer>
+  </main>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const form = $("loginForm");
+    const username = $("username");
+    const password = $("password");
+    const loginBtn = $("loginBtn");
+    const message = $("message");
+
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    $("togglePassword").addEventListener("click", () => {
+      const show = password.type === "password";
+
+      password.type = show ? "text" : "password";
+      $("togglePassword").textContent = show ? "Hide" : "Show";
+      $("togglePassword").setAttribute(
+        "aria-label",
+        show ? "Hide password" : "Show password"
+      );
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+
+      message.className = "";
+      message.textContent = "";
+
+      const name = username.value.trim();
+      const pass = password.value;
+
+      if (!name || !pass) {
+        showMessage("Enter your username and password.", "error");
+        return;
+      }
+
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Signing in...";
+
+      try {
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "same-origin",
+          body: JSON.stringify({
+            username: name,
+            password: pass
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Login failed.");
+        }
+
+        showMessage("Login successful. Opening Cloud Local...", "success");
+
+        // The server sets the session cookie. Navigate only after login succeeds.
+        window.location.replace("/");
+
+      } catch (error) {
+        showMessage(
+          error.message || "Unable to connect to the server.",
+          "error"
+        );
+      } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Sign in";
+      }
+    });
+
+    // If already authenticated, go straight to the dashboard.
+    fetch("/api/me", {
+      credentials: "same-origin"
+    })
+      .then(response => {
+        if (response.ok) {
+          window.location.replace("/");
+        }
+      })
+      .catch(() => {
+        // The user can still use the login form if this check fails.
+      });
+  </script>
+</body>
+</html>
